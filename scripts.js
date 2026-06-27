@@ -17,7 +17,7 @@ const inputMontantPrevision = document.getElementById("montantPrevision");
 const selectTypePrevision = document.getElementById("typePrevision");
 const selectCategoriePrevision = document.getElementById("categoriePrevision");
 const selectMoisPrevision = document.getElementById("moisPrevision");
-const boutonAjouterPrevision = document.getElementById("btnAjouterPrevision"); // CORRIGÉ : Déclaration ajoutée !
+const boutonAjouterPrevision = document.getElementById("btnAjouterPrevision");
 const listePrevisionsAffichage = document.getElementById("listePrevisions");
 const messageAucunePrevision = document.getElementById("messageAucunePrevision");
 const messageAucuneDepense = document.getElementById("messageAucuneDepense");
@@ -342,7 +342,6 @@ function afficherPrevisions() {
         const spanMontant = document.createElement("span");
         const montantFormate = prevision.montant.toFixed(2);
 
-        // Gestion personnalisée du texte selon la périodicité du mois sélectionné
         let textePeriodicite = "/mois";
         if (prevision.mois !== "tous") {
             textePeriodicite = ` en ${NOMS_MOIS[parseInt(prevision.mois)]}`;
