@@ -4,42 +4,125 @@
     <meta charset="UTF-8">
     <title>Mon Premier Budget JS</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; text-align: center; background: #1e1e2e; color: #cdd6f4; }
-.container { background: #313244; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-li { padding: 10px; border-bottom: 1px solid #45475a; display: flex; justify-content: space-between; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; max-width: 480px; margin: 50px auto; text-align: center; background: #1e1e2e; color: #cdd6f4; }
+        .container { background: #313244; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 20px; }
         .solde { font-size: 32px; font-weight: bold; margin: 20px 0; color: #2ecc71; }
         .inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input, select, button { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
+        input, select, button { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; width: 100%; box-sizing: border-box; }
         button { background-color: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #2980b9; }
         ul { list-style: none; padding: 0; text-align: left; }
-        li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        li { padding: 10px; border-bottom: 1px solid #45475a; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .plus { color: #2ecc71; font-weight: bold; }
         .moins { color: #e74c3c; font-weight: bold; }
+        .ligneTransaction { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .btnSupprimer { background-color: transparent; color: #e74c3c; border: none; font-size: 18px; padding: 0 6px; width: auto; cursor: pointer; font-weight: bold; }
+        .btnSupprimer:hover { color: #c0392b; background-color: transparent; }
+        .inputPrenom { margin-bottom: 15px; }
+        .badgeCategorie { background-color: #45475a; color: #cdd6f4; font-size: 12px; padding: 2px 8px; border-radius: 12px; margin-left: 6px; white-space: nowrap; }
+        h2.titreSection { font-size: 18px; margin-top: 0; }
+        .noDonnees { color: #6c7086; font-style: italic; margin: 10px 0; }
+        .soldeProjete { font-size: 14px; color: #94a3b8; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <input type="text" id="inputPrenom" class="inputPrenom" placeholder="Ton prénom (optionnel)">
         <h1 id="titreBienvenue">💰 Mon Budget</h1>
         <div class="solde">Solde : <span id="soldeTotal">0</span> €</div>
 
         <div class="inputs">
             <input type="text" id="nomTransaction" placeholder="Ex: Salaire, Courses...">
-            <input type="number" id="montant" placeholder="Montant (ex: 50)">
+            <input type="number" id="montant" placeholder="Montant (ex: 50)" min="0" step="0.01">
             <select id="type">
                 <option value="revenu">📈 Revenu (+)</option>
                 <option value="depense">📉 Dépense (-)</option>
+            </select>
+            <select id="categorie">
+                <option value="alimentation">🍔 Alimentation</option>
+                <option value="transport">🚗 Transport</option>
+                <option value="logement">🏠 Logement</option>
+                <option value="loisirs">🎉 Loisirs</option>
+                <option value="sante">💊 Santé</option>
+                <option value="assurance">🛡️ Assurances</option>
+                <option value="abonnements">📱 Abonnements & Télécom</option>
+                <option value="impots">📜 Impôts & Taxes</option>
+                <option value="epargne">🐷 Épargne & Inves.</option>
+                <option value="animaux">🐾 Animaux</option>
+                <option value="salaire">💼 Salaire</option>
+                <option value="autre">📦 Autre</option>
             </select>
             <button id="btnAjouter">Ajouter</button>
         </div>
 
         <h3>Historique :</h3>
+        <select id="filtreCategorie" style="margin-bottom: 10px; width: 100%;">
+            <option value="toutes">Toutes les catégories</option>
+            <option value="alimentation">🍔 Alimentation</option>
+            <option value="transport">🚗 Transport</option>
+            <option value="logement">🏠 Logement</option>
+            <option value="loisirs">🎉 Loisirs</option>
+            <option value="sante">💊 Santé</option>
+            <option value="assurance">🛡️ Assurances</option>
+            <option value="abonnements">📱 Abonnements & Télécom</option>
+            <option value="impots">📜 Impôts & Taxes</option>
+            <option value="epargne">🐷 Épargne & Inves.</option>
+            <option value="animaux">🐾 Animaux</option>
+            <option value="salaire">💼 Salaire</option>
+            <option value="autre">📦 Autre</option>
+        </select>
         <ul id="listeTransactions"></ul>
-        <button id="btnReset" style="background-color: #e74c3c; color: white; border: none; border-radius: 5px; padding: 10px; margin-top: 20px; width: 100%; font-weight: bold; cursor: pointer;">Réinitialiser le compte</button>
+        <button id="btnReset" style="background-color: #e74c3c; color: white; border: none; border-radius: 5px; padding: 10px; margin-top: 20px; font-weight: bold; cursor: pointer;">Réinitialiser le compte</button>
     </div>
 
+    <!-- ============ RÉPARTITION DES DÉPENSES (camembert) ============ -->
+    <div class="container">
+        <h2 class="titreSection">📊 Répartition des dépenses</h2>
+        <p id="messageAucuneDepense" class="noDonnees">Ajoute des dépenses pour voir le graphique.</p>
+        <canvas id="graphiqueCamembert"></canvas>
+    </div>
+
+    <!-- ============ PRÉVISIONS SUR L'ANNÉE ============ -->
+    <div class="container">
+        <h2 class="titreSection">🔮 Prévisions sur l'année</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin-top: 0;">
+            Renseigne ici les montants qui se répètent <strong>chaque mois</strong> (salaire, loyer, abonnements...) pour projeter ton solde sur les 12 prochains mois.
+        </p>
+
+        <div class="inputs">
+            <input type="text" id="nomPrevision" placeholder="Ex: Loyer, Salaire...">
+            <input type="number" id="montantPrevision" placeholder="Montant mensuel (ex: 50)" min="0" step="0.01">
+            <select id="typePrevision">
+                <option value="revenu">📈 Revenu (+)</option>
+                <option value="depense">📉 Dépense (-)</option>
+            </select>
+            <select id="categoriePrevision">
+                <option value="alimentation">🍔 Alimentation</option>
+                <option value="transport">🚗 Transport</option>
+                <option value="logement">🏠 Logement</option>
+                <option value="loisirs">🎉 Loisirs</option>
+                <option value="sante">💊 Santé</option>
+                <option value="assurance">🛡️ Assurances</option>
+                <option value="abonnements">📱 Abonnements & Télécom</option>
+                <option value="impots">📜 Impôts & Taxes</option>
+                <option value="epargne">🐷 Épargne & Inves.</option>
+                <option value="animaux">🐾 Animaux</option>
+                <option value="salaire">💼 Salaire</option>
+                <option value="autre">📦 Autre</option>
+            </select>
+            <button id="btnAjouterPrevision">Ajouter à mes prévisions mensuelles</button>
+        </div>
+
+        <h3>Mes prévisions mensuelles :</h3>
+        <p id="messageAucunePrevision" class="noDonnees">Aucune prévision pour l'instant.</p>
+        <ul id="listePrevisions"></ul>
+
+        <p class="soldeProjete">Solde actuel pris comme point de départ de la projection.</p>
+        <canvas id="graphiqueProjection"></canvas>
+    </div>
+
+    <<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
