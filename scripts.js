@@ -16,32 +16,32 @@ const inputNomPrevision = document.getElementById("nomPrevision");
 const inputMontantPrevision = document.getElementById("montantPrevision");
 const selectTypePrevision = document.getElementById("typePrevision");
 const selectCategoriePrevision = document.getElementById("categoriePrevision");
-const boutonAjouterPrevision = document.getElementById("btnAjouterPrevision");
+const selectMoisPrevision = document.getElementById("moisPrevision"); // Nouveau !
 const listePrevisionsAffichage = document.getElementById("listePrevisions");
 const messageAucunePrevision = document.getElementById("messageAucunePrevision");
 const messageAucuneDepense = document.getElementById("messageAucuneDepense");
 
-// Couleur attribuée à chaque catégorie, utilisée dans le camembert
+// Noms des mois pour l'affichage textuel et le graphique
+const NOMS_MOIS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 const COULEURS_CATEGORIES = {
-    alimentation: "#f39c12", // Orange
-    transport: "#3498db",    // Bleu
-    logement: "#9b59b6",     // Violet
-    loisirs: "#e67e22",      // Orange foncé
-    sante: "#1abc9c",        // Turquoise
-    assurance: "#e74c3c",    // Rouge
-    abonnements: "#34495e",  // Bleu nuit
-    impots: "#d35400",       // Rouille
-    epargne: "#27ae60",      // Vert foncé
-    animaux: "#a0522d",      // Marron
-    salaire: "#2ecc71",      // Vert clair
-    autre: "#7f8c8d"         // Gris
+    alimentation: "#f39c12",
+    transport: "#3498db",
+    logement: "#9b59b6",
+    loisirs: "#e67e22",
+    sante: "#1abc9c",
+    assurance: "#e74c3c",
+    abonnements: "#34495e",
+    impots: "#d35400",
+    epargne: "#27ae60",
+    animaux: "#a0522d",
+    salaire: "#2ecc71",
+    autre: "#7f8c8d"
 };
 
-// On garde une référence aux graphiques pour pouvoir les détruire/recréer proprement
 let graphiqueCamembertInstance = null;
 let graphiqueProjectionInstance = null;
 
-// Dictionnaire pour afficher un joli label (emoji + texte) à partir de la valeur stockée
 const CATEGORIES = {
     alimentation: "🍔 Alimentation",
     transport: "🚗 Transport",
@@ -57,7 +57,7 @@ const CATEGORIES = {
     autre: "📦 Autre"
 };
 
-// --- PERSONNALISATION DU PRÉNOM (sans popup bloquante) ---
+// --- PERSONNALISATION DU PRÉNOM ---
 const prenomSauvegarde = localStorage.getItem("prenomUtilisateur");
 if (prenomSauvegarde) {
     inputPrenom.value = prenomSauvegarde;
@@ -82,7 +82,7 @@ let listeDesTransactions = historiqueSauvegarde ? JSON.parse(historiqueSauvegard
 const previsionsSauvegardees = localStorage.getItem("mesPrevisions");
 let listeDesPrevisions = previsionsSauvegardees ? JSON.parse(previsionsSauvegardees) : [];
 
-// --- MIGRATION : catégories supprimées (ex: "shopping", "cadeaux") basculent vers "autre" ---
+// --- MIGRATION : catégories supprimées ---
 function migrerCategoriesSupprimees() {
     const categoriesSupprimees = ["shopping", "cadeaux"];
     let modifie = false;
@@ -109,7 +109,6 @@ function migrerCategoriesSupprimees() {
 migrerCategoriesSupprimees();
 
 // --- ÉCOUTEURS D'ÉVÉNEMENTS ---
-// Branchés AVANT le premier rendu, pour qu'ils fonctionnent même si l'affichage initial rencontre un souci
 bouton.addEventListener("click", ajouterUneTransaction);
 boutonReset.addEventListener("click", reinitialiserTout);
 
@@ -121,7 +120,6 @@ inputMontant.addEventListener("keypress", function(e) {
 });
 
 selectFiltre.addEventListener("change", rafraichirAffichage);
-
 boutonAjouterPrevision.addEventListener("click", ajouterUnePrevision);
 
 inputNomPrevision.addEventListener("keypress", function(e) {
@@ -131,7 +129,6 @@ inputMontantPrevision.addEventListener("keypress", function(e) {
     if (e.key === "Enter") ajouterUnePrevision();
 });
 
-// On restaure tout l'affichage au démarrage (historique + prévisions + graphiques)
 rafraichirAffichage();
 afficherPrevisions();
 
@@ -143,30 +140,24 @@ function rafraichirAffichage() {
     const categorieChoisie = selectFiltre.value;
 
     listeDesTransactions.forEach(function(transaction) {
-        // Le solde total prend TOUJOURS en compte l'ensemble des transactions,
-        // peu importe le filtre actif (le filtre ne change que l'affichage de la liste)
         if (transaction.type === "revenu") {
             argentTotal += transaction.montant;
         } else {
             argentTotal -= transaction.montant;
         }
 
-        // Si un filtre est actif et ne correspond pas, on n'affiche pas la ligne
         if (categorieChoisie !== "toutes" && transaction.categorie !== categorieChoisie) {
             return;
         }
 
         const nouvelleLigne = document.createElement("li");
-
-        // .toFixed(2) transforme le montant en texte avec 2 décimales (ex: 5 devient 5.00)
         const montantFormate = transaction.montant.toFixed(2);
 
-        // --- Conteneur texte (nom + montant) ---
         const conteneurTexte = document.createElement("div");
         conteneurTexte.className = "ligneTransaction";
 
         const spanNom = document.createElement("span");
-        spanNom.textContent = transaction.nom; // textContent => pas d'injection HTML possible
+        spanNom.textContent = transaction.nom;
 
         const badgeCategorie = document.createElement("span");
         badgeCategorie.className = "badgeCategorie";
@@ -186,7 +177,6 @@ function rafraichirAffichage() {
         conteneurTexte.appendChild(badgeCategorie);
         conteneurTexte.appendChild(spanMontant);
 
-        // --- Bouton supprimer (par transaction) ---
         const boutonSupprimer = document.createElement("button");
         boutonSupprimer.className = "btnSupprimer";
         boutonSupprimer.textContent = "✕";
@@ -197,11 +187,9 @@ function rafraichirAffichage() {
 
         nouvelleLigne.appendChild(conteneurTexte);
         nouvelleLigne.appendChild(boutonSupprimer);
-
         listeHistorique.appendChild(nouvelleLigne);
     });
 
-    // On applique aussi .toFixed(2) sur le solde total global
     soldeAffichage.textContent = argentTotal.toFixed(2);
 
     if (argentTotal >= 0) {
@@ -210,7 +198,6 @@ function rafraichirAffichage() {
         soldeAffichage.style.color = "#e74c3c";
     }
 
-    // Les deux graphiques dépendent du solde / des dépenses : on les met à jour ici
     mettreAJourGraphiqueCamembert();
     mettreAJourGraphiqueProjection(argentTotal);
 }
@@ -226,7 +213,7 @@ function ajouterUneTransaction() {
     }
 
     const nouvelleTransaction = {
-        id: Date.now(), // identifiant unique pour pouvoir cibler/supprimer cette transaction précise
+        id: Date.now(),
         nom: nom,
         montant: montant,
         type: selectType.value,
@@ -255,9 +242,7 @@ function supprimerUneTransaction(id) {
 
 // 5. Fonction pour réinitialiser tout l'historique
 function reinitialiserTout() {
-    // On demande une confirmation pour éviter les erreurs d'inattention
     const confirmer = confirm("Es-tu sûr de vouloir supprimer tout ton historique ?");
-
     if (confirmer) {
         listeDesTransactions = [];
         localStorage.removeItem("mesTransactions");
@@ -267,14 +252,11 @@ function reinitialiserTout() {
 
 // 6. Graphique camembert : répartition des dépenses réelles par catégorie
 function mettreAJourGraphiqueCamembert() {
-    // Sécurité : si Chart.js n'a pas pu se charger (pas d'internet, CDN bloqué...),
-    // on arrête juste cette fonction au lieu de planter tout le reste du script
     if (typeof Chart === "undefined") {
         console.warn("Chart.js n'est pas chargé : le graphique camembert est désactivé.");
         return;
     }
 
-    // On additionne les dépenses (type "depense" uniquement) par catégorie
     const totauxParCategorie = {};
 
     listeDesTransactions.forEach(function(transaction) {
@@ -289,7 +271,6 @@ function mettreAJourGraphiqueCamembert() {
 
     const categoriesPresentes = Object.keys(totauxParCategorie);
 
-    // Si on n'a aucune dépense, on affiche un message plutôt qu'un graphique vide
     if (categoriesPresentes.length === 0) {
         messageAucuneDepense.style.display = "block";
         if (graphiqueCamembertInstance) {
@@ -313,7 +294,6 @@ function mettreAJourGraphiqueCamembert() {
 
     const contexte = document.getElementById("graphiqueCamembert").getContext("2d");
 
-    // On détruit l'ancien graphique avant d'en recréer un (sinon Chart.js superpose les anciens)
     if (graphiqueCamembertInstance) {
         graphiqueCamembertInstance.destroy();
     }
@@ -361,12 +341,18 @@ function afficherPrevisions() {
         const spanMontant = document.createElement("span");
         const montantFormate = prevision.montant.toFixed(2);
 
+        // Gestion personnalisée du texte selon la périodicité du mois sélectionné
+        let textePeriodicite = "/mois";
+        if (prevision.mois !== "tous") {
+            textePeriodicite = ` en ${NOMS_MOIS[parseInt(prevision.mois)]}`;
+        }
+
         if (prevision.type === "revenu") {
             spanMontant.className = "plus";
-            spanMontant.textContent = `+${montantFormate} €/mois`;
+            spanMontant.textContent = `+${montantFormate} €${textePeriodicite}`;
         } else {
             spanMontant.className = "moins";
-            spanMontant.textContent = `-${montantFormate} €/mois`;
+            spanMontant.textContent = `-${montantFormate} €${textePeriodicite}`;
         }
 
         conteneurTexte.appendChild(spanNom);
@@ -387,7 +373,7 @@ function afficherPrevisions() {
     });
 }
 
-// 8. Ajoute une nouvelle prévision mensuelle (récurrente chaque mois)
+// 8. Ajoute une nouvelle prévision mensuelle ou ponctuelle
 function ajouterUnePrevision() {
     const nom = inputNomPrevision.value.trim();
     const montant = parseFloat(inputMontantPrevision.value);
@@ -402,13 +388,14 @@ function ajouterUnePrevision() {
         nom: nom,
         montant: montant,
         type: selectTypePrevision.value,
-        categorie: selectCategoriePrevision.value
+        categorie: selectCategoriePrevision.value,
+        mois: selectMoisPrevision.value // On stocke la valeur ("tous", "0", "1" etc.)
     });
 
     localStorage.setItem("mesPrevisions", JSON.stringify(listeDesPrevisions));
 
     afficherPrevisions();
-    rafraichirAffichage(); // recalcule aussi le graphique de projection
+    rafraichirAffichage();
 
     inputNomPrevision.value = "";
     inputMontantPrevision.value = "";
@@ -427,32 +414,44 @@ function supprimerUnePrevision(id) {
     rafraichirAffichage();
 }
 
-// 10. Graphique de projection : solde actuel + impact cumulé des prévisions sur 12 mois
+// 10. LOGIQUE MAGIQUE CHANGER : Graphique de projection glissant et intelligent mois par mois
 function mettreAJourGraphiqueProjection(soldeActuel) {
-    // Même sécurité que pour le camembert
     if (typeof Chart === "undefined") {
         console.warn("Chart.js n'est pas chargé : le graphique de projection est désactivé.");
         return;
     }
 
-    // Net mensuel = somme des revenus prévus - somme des dépenses prévues
-    let netMensuel = 0;
-    listeDesPrevisions.forEach(function(prevision) {
-        if (prevision.type === "revenu") {
-            netMensuel += prevision.montant;
-        } else {
-            netMensuel -= prevision.montant;
-        }
-    });
-
-    // On construit 13 points : "Aujourd'hui", puis "Mois 1" à "Mois 12"
     const labels = ["Aujourd'hui"];
     const donnees = [soldeActuel];
 
+    // On récupère l'index du mois actuel de la machine de l'utilisateur (0 pour janvier, 5 pour juin, etc.)
+    const moisActuelIndex = new Date().getMonth();
+
     let soldeProjete = soldeActuel;
-    for (let mois = 1; mois <= 12; mois++) {
-        soldeProjete += netMensuel;
-        labels.push(`Mois ${mois}`);
+
+    // On calcule l'évolution sur les 12 prochains mois glissants
+    for (let i = 1; i <= 12; i++) {
+        // Calcul du mois ciblé dans la boucle (0 à 11) grâce au modulo
+        const moisCibleIndex = (moisActuelIndex + i - 1) % 12;
+
+        let fluxDuMois = 0;
+
+        // On parcourt les prévisions pour voir si elles s'appliquent au mois ciblé
+        listeDesPrevisions.forEach(function(prevision) {
+            // La prévision s'applique si elle est récurrente ("tous") OU si elle matche le mois pile
+            if (prevision.mois === "tous" || parseInt(prevision.mois) === moisCibleIndex) {
+                if (prevision.type === "revenu") {
+                    fluxDuMois += prevision.montant;
+                } else {
+                    fluxDuMois -= prevision.montant;
+                }
+            }
+        });
+
+        soldeProjete += fluxDuMois;
+        
+        // On affiche le nom du mois réel sur l'axe X (ex: "Juillet", "Août"...)
+        labels.push(NOMS_MOIS[moisCibleIndex]);
         donnees.push(Math.round(soldeProjete * 100) / 100);
     }
 
