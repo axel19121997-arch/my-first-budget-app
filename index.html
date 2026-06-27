@@ -24,6 +24,8 @@
         .noDonnees { color: #6c7086; font-style: italic; margin: 10px 0; }
         .soldeProjete { font-size: 14px; color: #94a3b8; margin-bottom: 10px; }
     </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -76,14 +78,12 @@
         <button id="btnReset" style="background-color: #e74c3c; color: white; border: none; border-radius: 5px; padding: 10px; margin-top: 20px; font-weight: bold; cursor: pointer;">Réinitialiser le compte</button>
     </div>
 
-    <!-- ============ RÉPARTITION DES DÉPENSES (camembert) ============ -->
     <div class="container">
         <h2 class="titreSection">📊 Répartition des dépenses</h2>
         <p id="messageAucuneDepense" class="noDonnees">Ajoute des dépenses pour voir le graphique.</p>
         <canvas id="graphiqueCamembert"></canvas>
     </div>
 
-    <!-- ============ PRÉVISIONS SUR L'ANNÉE ============ -->
     <div class="container">
         <h2 class="titreSection">🔮 Prévisions sur l'année</h2>
         <p style="font-size: 13px; color: #94a3b8; margin-top: 0;">
@@ -111,6 +111,21 @@
                 <option value="salaire">💼 Salaire</option>
                 <option value="autre">📦 Autre</option>
             </select>
+            <select id="moisPrevision">
+                <option value="tous">🔄 Chaque mois (Récurrent)</option>
+                <option value="0">📅 Janvier</option>
+                <option value="1">📅 Février</option>
+                <option value="2">📅 Mars</option>
+                <option value="3">📅 Avril</option>
+                <option value="4">📅 Mai</option>
+                <option value="5">📅 Juin</option>
+                <option value="6">📅 Juillet</option>
+                <option value="7">📅 Août</option>
+                <option value="8">📅 Septembre</option>
+                <option value="9">📅 Octobre</option>
+                <option value="10">📅 Novembre</option>
+                <option value="11">📅 Décembre</option>
+            </select>
             <button id="btnAjouterPrevision">Ajouter à mes prévisions mensuelles</button>
         </div>
 
@@ -122,7 +137,6 @@
         <canvas id="graphiqueProjection"></canvas>
     </div>
 
-    <<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
