@@ -16,7 +16,8 @@ const inputNomPrevision = document.getElementById("nomPrevision");
 const inputMontantPrevision = document.getElementById("montantPrevision");
 const selectTypePrevision = document.getElementById("typePrevision");
 const selectCategoriePrevision = document.getElementById("categoriePrevision");
-const selectMoisPrevision = document.getElementById("moisPrevision"); // Nouveau !
+const selectMoisPrevision = document.getElementById("moisPrevision");
+const boutonAjouterPrevision = document.getElementById("btnAjouterPrevision"); // CORRIGÉ : Déclaration ajoutée !
 const listePrevisionsAffichage = document.getElementById("listePrevisions");
 const messageAucunePrevision = document.getElementById("messageAucunePrevision");
 const messageAucuneDepense = document.getElementById("messageAucuneDepense");
@@ -389,7 +390,7 @@ function ajouterUnePrevision() {
         montant: montant,
         type: selectTypePrevision.value,
         categorie: selectCategoriePrevision.value,
-        mois: selectMoisPrevision.value // On stocke la valeur ("tous", "0", "1" etc.)
+        mois: selectMoisPrevision.value
     });
 
     localStorage.setItem("mesPrevisions", JSON.stringify(listeDesPrevisions));
@@ -414,7 +415,7 @@ function supprimerUnePrevision(id) {
     rafraichirAffichage();
 }
 
-// 10. LOGIQUE MAGIQUE CHANGER : Graphique de projection glissant et intelligent mois par mois
+// 10. LOGIQUE DE PROJECTION MOIS PAR MOIS GLISSANTE
 function mettreAJourGraphiqueProjection(soldeActuel) {
     if (typeof Chart === "undefined") {
         console.warn("Chart.js n'est pas chargé : le graphique de projection est désactivé.");
@@ -424,21 +425,14 @@ function mettreAJourGraphiqueProjection(soldeActuel) {
     const labels = ["Aujourd'hui"];
     const donnees = [soldeActuel];
 
-    // On récupère l'index du mois actuel de la machine de l'utilisateur (0 pour janvier, 5 pour juin, etc.)
     const moisActuelIndex = new Date().getMonth();
-
     let soldeProjete = soldeActuel;
 
-    // On calcule l'évolution sur les 12 prochains mois glissants
     for (let i = 1; i <= 12; i++) {
-        // Calcul du mois ciblé dans la boucle (0 à 11) grâce au modulo
         const moisCibleIndex = (moisActuelIndex + i - 1) % 12;
-
         let fluxDuMois = 0;
 
-        // On parcourt les prévisions pour voir si elles s'appliquent au mois ciblé
         listeDesPrevisions.forEach(function(prevision) {
-            // La prévision s'applique si elle est récurrente ("tous") OU si elle matche le mois pile
             if (prevision.mois === "tous" || parseInt(prevision.mois) === moisCibleIndex) {
                 if (prevision.type === "revenu") {
                     fluxDuMois += prevision.montant;
@@ -450,7 +444,6 @@ function mettreAJourGraphiqueProjection(soldeActuel) {
 
         soldeProjete += fluxDuMois;
         
-        // On affiche le nom du mois réel sur l'axe X (ex: "Juillet", "Août"...)
         labels.push(NOMS_MOIS[moisCibleIndex]);
         donnees.push(Math.round(soldeProjete * 100) / 100);
     }
