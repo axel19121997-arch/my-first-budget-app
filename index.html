@@ -23,6 +23,13 @@
         h2.titreSection { font-size: 18px; margin-top: 0; }
         .noDonnees { color: #6c7086; font-style: italic; margin: 10px 0; }
         .soldeProjete { font-size: 14px; color: #94a3b8; margin-bottom: 10px; }
+        .btnModifier { background-color: transparent; color: #f1c40f; border: none; font-size: 16px; padding: 0 4px; width: auto; cursor: pointer; }
+        .btnModifier:hover { color: #d4ac0d; background-color: transparent; }
+        .budgetItem { margin-bottom: 14px; text-align: left; }
+        .budgetEntete { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 4px; }
+        .budgetBarreExterieure { background-color: #45475a; border-radius: 8px; height: 14px; overflow: hidden; }
+        .budgetBarreInterieure { height: 100%; border-radius: 8px; transition: width 0.3s ease; }
+        .budgetSupprimer { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 14px; width: auto; padding: 0 4px; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -55,33 +62,77 @@
                 <option value="salaire">💼 Salaire</option>
                 <option value="autre">📦 Autre</option>
             </select>
-            <button id="btnAjouter">Ajouter</button>
+            <div style="display:flex; gap:10px;">
+                <button id="btnAjouter" style="flex:1;">Ajouter</button>
+                <button id="btnAnnulerEdition" style="flex:1; display:none; background-color:#6c7086;">Annuler</button>
+            </div>
         </div>
 
         <h3>Historique :</h3>
-        <select id="filtreCategorie" style="margin-bottom: 10px; width: 100%;">
-            <option value="toutes">Toutes les catégories</option>
-            <option value="alimentation">🍔 Alimentation</option>
-            <option value="transport">🚗 Transport</option>
-            <option value="logement">🏠 Logement</option>
-            <option value="loisirs">🎉 Loisirs</option>
-            <option value="sante">💊 Santé</option>
-            <option value="assurance">🛡️ Assurances</option>
-            <option value="abonnements">📱 Abonnements & Télécom</option>
-            <option value="impots">📜 Impôts & Taxes</option>
-            <option value="epargne">🐷 Épargne & Inves.</option>
-            <option value="animaux">🐾 Animaux</option>
-            <option value="salaire">💼 Salaire</option>
-            <option value="autre">📦 Autre</option>
-        </select>
+        <div style="display:flex; gap:10px; margin-bottom: 10px;">
+            <select id="filtreCategorie" style="flex:1;">
+                <option value="toutes">Toutes les catégories</option>
+                <option value="alimentation">🍔 Alimentation</option>
+                <option value="transport">🚗 Transport</option>
+                <option value="logement">🏠 Logement</option>
+                <option value="loisirs">🎉 Loisirs</option>
+                <option value="sante">💊 Santé</option>
+                <option value="assurance">🛡️ Assurances</option>
+                <option value="abonnements">📱 Abonnements & Télécom</option>
+                <option value="impots">📜 Impôts & Taxes</option>
+                <option value="epargne">🐷 Épargne & Inves.</option>
+                <option value="animaux">🐾 Animaux</option>
+                <option value="salaire">💼 Salaire</option>
+                <option value="autre">📦 Autre</option>
+            </select>
+            <select id="filtrePeriode" style="flex:1;">
+                <option value="tout">Toute la période</option>
+                <option value="moisCourant">Ce mois-ci</option>
+                <option value="3mois">3 derniers mois</option>
+                <option value="anneeCourante">Cette année</option>
+            </select>
+        </div>
         <ul id="listeTransactions"></ul>
-        <button id="btnReset" style="background-color: #e74c3c; color: white; border: none; border-radius: 5px; padding: 10px; margin-top: 20px; font-weight: bold; cursor: pointer;">Réinitialiser le compte</button>
+        <div style="display:flex; gap:10px; margin-top: 20px;">
+            <button id="btnReset" style="flex:1; background-color: #e74c3c; color: white; border: none; border-radius: 5px; padding: 10px; font-weight: bold; cursor: pointer;">Réinitialiser le compte</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-top: 10px;">
+            <button id="btnExporterCSV" style="flex:1; background-color: #45475a;">⬇️ Exporter en CSV</button>
+            <button id="btnExporterJSON" style="flex:1; background-color: #45475a;">⬇️ Exporter en JSON</button>
+        </div>
     </div>
 
     <div class="container">
         <h2 class="titreSection">📊 Répartition des dépenses</h2>
         <p id="messageAucuneDepense" class="noDonnees">Ajoute des dépenses pour voir le graphique.</p>
         <canvas id="graphiqueCamembert"></canvas>
+    </div>
+
+    <div class="container">
+        <h2 class="titreSection">🎯 Budgets mensuels par catégorie</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin-top: 0;">
+            Fixe une limite de dépense par mois pour une catégorie, et suis ta progression en temps réel.
+        </p>
+        <div class="inputs">
+            <select id="categorieBudget">
+                <option value="alimentation">🍔 Alimentation</option>
+                <option value="transport">🚗 Transport</option>
+                <option value="logement">🏠 Logement</option>
+                <option value="loisirs">🎉 Loisirs</option>
+                <option value="sante">💊 Santé</option>
+                <option value="assurance">🛡️ Assurances</option>
+                <option value="abonnements">📱 Abonnements & Télécom</option>
+                <option value="impots">📜 Impôts & Taxes</option>
+                <option value="epargne">🐷 Épargne & Inves.</option>
+                <option value="animaux">🐾 Animaux</option>
+                <option value="salaire">💼 Salaire</option>
+                <option value="autre">📦 Autre</option>
+            </select>
+            <input type="number" id="montantBudget" placeholder="Budget mensuel (ex: 250)" min="0" step="0.01">
+            <button id="btnDefinirBudget">Définir ce budget</button>
+        </div>
+        <p id="messageAucunBudget" class="noDonnees">Aucun budget défini pour l'instant.</p>
+        <div id="listeBudgets"></div>
     </div>
 
     <div class="container">
